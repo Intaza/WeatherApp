@@ -40,7 +40,7 @@ A modern, production-ready React weather application featuring real-time forecas
 
 ```bash
 # Clone the repository
-git clone https://github.com/Intaza/WeatherApp.git
+git clone <https://github.com/Intaza/WeatherApp.git>
 cd WeatherApp
 
 # Install dependencies
