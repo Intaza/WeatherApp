@@ -3,7 +3,7 @@ import { WeatherData, ForecastData, AirPollutionData } from '@/types/weather';
 
 // NOTE: Replace with your OpenWeatherMap API key
 // Get your free API key at: https://openweathermap.org/api
-const API_KEY = '2c639c96463b511f05b567ca3c3cb16b';
+const API_KEY = import.meta.env.VITE_OPENWEATHER_KEY;
 const BASE_URL = 'https://api.openweathermap.org/data/2.5';
 
 class WeatherService {
