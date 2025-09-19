@@ -2,6 +2,8 @@
 
 A modern, production-ready React weather application featuring real-time forecasts, air quality monitoring, and interactive data visualizations.
 
+**Live Demo:** [View the Project]()
+
 ![Weather Dashboard](https://images.unsplash.com/photo-1504608524841-42fe6f032b4b?w=1200&h=400&fit=crop&crop=top)
 
 ## ✨ Features
@@ -65,28 +67,6 @@ npm run dev
 const API_KEY = 'your_actual_api_key_here';
 ```
 
-## 🏗️ Project Structure
-
-```
-src/
-├── components/           # React components
-│   ├── SearchBar.tsx    # Search and geolocation
-│   ├── WeatherCard.tsx  # Current weather display
-│   ├── ForecastCard.tsx # 5-day forecast
-│   ├── WeatherChart.tsx # Data visualizations
-│   ├── Favorites.tsx    # Saved cities
-│   ├── AirQuality.tsx   # AQI display
-│   └── ThemeToggle.tsx  # Theme switching
-├── services/            # API services
-│   └── weatherService.ts # OpenWeatherMap integration
-├── types/               # TypeScript definitions
-│   └── weather.ts       # Weather data interfaces
-├── utils/               # Helper functions
-│   └── weatherHelpers.ts # Formatting and utilities
-├── hooks/               # Custom React hooks
-│   └── useLocalStorage.ts # Persistent storage
-└── App.tsx             # Main application
-```
 
 ## 🌐 Deployment
 
@@ -146,13 +126,6 @@ searchWeather('Your City', 'city');
 }
 ```
 
-## 🔑 API Endpoints Used
-
-- `api.openweathermap.org/data/2.5/weather` - Current weather
-- `api.openweathermap.org/data/2.5/forecast` - 5-day forecast
-- `api.openweathermap.org/data/2.5/air_pollution` - Air quality
-- `api.openweathermap.org/geo/1.0/direct` - Geocoding
-
 ## 🐛 Troubleshooting
 
 ### Common Issues
@@ -179,14 +152,6 @@ searchWeather('Your City', 'city');
 
 This project is open source and available under the [MIT License](LICENSE).
 
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/amazing-feature`
-3. Commit changes: `git commit -m 'Add amazing feature'`
-4. Push to branch: `git push origin feature/amazing-feature`
-5. Open a Pull Request
-
 ## 🙏 Acknowledgments
 
 - [OpenWeatherMap](https://openweathermap.org) for weather data API
@@ -196,4 +161,10 @@ This project is open source and available under the [MIT License](LICENSE).
 
 ---
 
-Built with ❤️ using React, TypeScript, and modern web technologies.
+## Contact
+
+Check out my GitHub profile [Intaza](https://github.com/Intaza)  
+and visit this project repository [WeatherApp](https://github.com/Intaza/BLOG)
+
+---
+Thank You! 
