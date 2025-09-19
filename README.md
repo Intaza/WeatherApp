@@ -2,7 +2,7 @@
 
 A modern, production-ready React weather application featuring real-time forecasts, air quality monitoring, and interactive data visualizations.
 
-**Live Demo:** [View the Project]()
+**Live Demo:** [View the Project](https://weather-intaza.vercel.app/)
 
 ![Weather Dashboard](https://images.unsplash.com/photo-1504608524841-42fe6f032b4b?w=1200&h=400&fit=crop&crop=top)
 
