@@ -148,10 +148,6 @@ searchWeather('Your City', 'city');
 - **Location**: Used only when explicitly requested
 - **No Tracking**: No analytics or third-party tracking
 
-## 📄 License
-
-This project is open source and available under the [MIT License](LICENSE).
-
 ## 🙏 Acknowledgments
 
 - [OpenWeatherMap](https://openweathermap.org) for weather data API
