@@ -10,29 +10,50 @@ interface ForecastCardProps {
 }
 
 export const ForecastCard = ({ forecast, preferences }: ForecastCardProps) => {
-  // Group forecast by day and get midday reading for each day
-  const dailyForecast = forecast.list.reduce((acc: any[], item) => {
-    const date = new Date(item.dt * 1000).toDateString();
-    const existingDay = acc.find(day => day.date === date);
-    
-    if (!existingDay) {
-      acc.push({
-        date,
-        timestamp: item.dt,
-        weather: item.weather[0],
-        temp_max: item.main.temp_max,
-        temp_min: item.main.temp_min,
-        humidity: item.main.humidity,
-        wind_speed: item.wind.speed,
+  // Group by local day using city timezone and compute representative stats
+  const timezoneOffsetSec = forecast.city?.timezone ?? 0;
+  const groups: Record<string, any[]> = {};
+
+  forecast.list.forEach((item) => {
+    const localMs = (item.dt + timezoneOffsetSec) * 1000;
+    const localDate = new Date(localMs);
+    const key = localDate.toISOString().slice(0, 10); // YYYY-MM-DD in local offset frame
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(item);
+  });
+
+  const dailyForecast = Object.entries(groups)
+    .slice(0, 5)
+    .map(([key, items]) => {
+      // Pick the slot closest to 12:00 local time
+      const targetHour = 12;
+      const withLocal = items.map((it) => {
+        const localMs = (it.dt + timezoneOffsetSec) * 1000;
+        const d = new Date(localMs);
+        return { original: it, date: d, hourDiff: Math.abs(d.getHours() - targetHour) };
       });
-    } else {
-      // Update max/min temperatures
-      existingDay.temp_max = Math.max(existingDay.temp_max, item.main.temp_max);
-      existingDay.temp_min = Math.min(existingDay.temp_min, item.main.temp_min);
-    }
-    
-    return acc;
-  }, []).slice(0, 5); // Only show 5 days
+      withLocal.sort((a, b) => a.hourDiff - b.hourDiff);
+      const representative = withLocal[0].original;
+
+      // Compute max/min temps, average humidity and wind speed for the day
+      const tempMax = Math.max(...items.map((it: any) => it.main.temp_max));
+      const tempMin = Math.min(...items.map((it: any) => it.main.temp_min));
+      const avgHumidity = Math.round(
+        items.reduce((sum: number, it: any) => sum + it.main.humidity, 0) / items.length
+      );
+      const avgWind = items.reduce((sum: number, it: any) => sum + it.wind.speed, 0) / items.length;
+
+      return {
+        date: key,
+        timestamp: representative.dt,
+        weather: representative.weather[0],
+        temp_max: tempMax,
+        temp_min: tempMin,
+        humidity: avgHumidity,
+        wind_speed: avgWind,
+      };
+    })
+    .slice(0, 5);
 
   return (
     <Card className="glass-card border-0">
@@ -78,7 +99,7 @@ export const ForecastCard = ({ forecast, preferences }: ForecastCardProps) => {
                     💧 {day.humidity}%
                   </div>
                   <div className="text-xs text-muted-foreground">
-                    💨 {Math.round(day.wind_speed)} m/s
+                    💨 {Math.round(day.wind_speed * 10) / 10} m/s
                   </div>
                 </div>
               </div>

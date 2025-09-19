@@ -33,6 +33,7 @@ function App() {
 
   // Persistent data
   const [favorites, setFavorites] = useLocalStorage<FavoriteCity[]>('weather-favorites', []);
+  const [defaultCity, setDefaultCity] = useLocalStorage<FavoriteCity | null>('weather-default-city', null);
   const [preferences, setPreferences] = useLocalStorage<UserPreferences>('weather-preferences', {
     temperatureUnit: 'celsius',
     language: 'en',
@@ -158,6 +159,24 @@ function App() {
     setPreferences(prev => ({ ...prev, ...newPrefs }));
   };
 
+  // Set default city
+  const setAsDefaultCity = (city: FavoriteCity) => {
+    setDefaultCity(city);
+    toast({
+      title: 'Default city set',
+      description: `${city.name}, ${city.country} is now your default city`,
+    });
+  };
+
+  // Clear default city
+  const clearDefaultCity = () => {
+    setDefaultCity(null);
+    toast({
+      title: 'Default city cleared',
+      description: 'No default city set',
+    });
+  };
+
   // Retry function for error display
   const retryLastSearch = () => {
     if (weather) {
@@ -165,13 +184,18 @@ function App() {
     }
   };
 
-  // Load demo weather on first visit (optional)
+  // Load default city or demo weather on first visit
   useEffect(() => {
     if (!weather && !loading && !error && isApiConfigured) {
-      // Load default city (London) as demo
-      searchWeather('London', 'city');
+      if (defaultCity) {
+        // Load user's default city
+        searchWeather(`${defaultCity.coord.lat},${defaultCity.coord.lon}`, 'coordinates');
+      } else {
+        // Load London as demo if no default city set
+        searchWeather('London', 'city');
+      }
     }
-  }, []);
+  }, [defaultCity]);
 
   return (
     <div className={`min-h-screen transition-all duration-500 ${backgroundClass}`}>
@@ -182,7 +206,7 @@ function App() {
           <div className="flex items-center justify-center gap-4 mb-4">
             <Cloud className="h-8 w-8 text-primary" />
             <h1 className="text-4xl md:text-5xl font-bold text-white drop-shadow-lg">
-              Weather Dashboard
+              How's the weather?
             </h1>
           </div>
           
@@ -199,8 +223,11 @@ function App() {
               <AddToFavorites
                 weather={weather}
                 favorites={favorites}
+                defaultCity={defaultCity}
                 onAddFavorite={addToFavorites}
                 onRemoveFavorite={removeFromFavorites}
+                onSetDefault={setAsDefaultCity}
+                onClearDefault={clearDefaultCity}
               />
             )}
           </div>

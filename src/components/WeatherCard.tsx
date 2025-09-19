@@ -12,6 +12,7 @@ import { WeatherData, UserPreferences } from '@/types/weather';
 import { formatTemperature, getWindDirection, formatTime, isDay, getWeatherIcon } from '@/utils/weatherHelpers';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { useState, useEffect } from 'react';
 
 interface WeatherCardProps {
   weather: WeatherData;
@@ -19,8 +20,97 @@ interface WeatherCardProps {
 }
 
 export const WeatherCard = ({ weather, preferences }: WeatherCardProps) => {
+  const [currentTime, setCurrentTime] = useState('');
   const isDayTime = isDay(weather.dt, weather.sys.sunrise, weather.sys.sunset);
   const weatherCondition = weather.weather[0];
+
+  // Update time every second for real-time updates
+  useEffect(() => {
+    const updateTime = () => {
+      const now = new Date();
+      // weather.timezone is the offset in seconds from UTC
+      // Get UTC time and add the timezone offset
+      const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000);
+      const localTime = new Date(utcTime + (weather.timezone * 1000));
+      
+      // Get timezone abbreviation based on city and offset
+      const getTimezoneAbbreviation = (offsetSeconds: number, cityName: string, country: string) => {
+        const offsetHours = offsetSeconds / 3600;
+        
+        // City-specific timezone mappings
+        const cityLower = cityName.toLowerCase();
+        const countryLower = country.toLowerCase();
+        
+        // India
+        if (countryLower === 'in' && offsetHours === 5.5) return 'IST';
+        
+        // United Kingdom
+        if (countryLower === 'gb' || countryLower === 'uk') {
+          if (offsetHours === 0) return 'GMT';
+          if (offsetHours === 1) return 'BST';
+        }
+        
+        // United States
+        if (countryLower === 'us') {
+          if (offsetHours === -5) return 'EST';
+          if (offsetHours === -4) return 'EDT';
+          if (offsetHours === -6) return 'CST';
+          if (offsetHours === -5) return 'CDT';
+          if (offsetHours === -7) return 'MST';
+          if (offsetHours === -6) return 'MDT';
+          if (offsetHours === -8) return 'PST';
+          if (offsetHours === -7) return 'PDT';
+        }
+        
+        // Europe
+        if (offsetHours === 1) {
+          if (cityLower.includes('london')) return 'BST';
+          if (cityLower.includes('berlin') || cityLower.includes('paris') || cityLower.includes('rome')) return 'CET';
+        }
+        if (offsetHours === 2) {
+          if (cityLower.includes('berlin') || cityLower.includes('paris') || cityLower.includes('rome')) return 'CEST';
+        }
+        
+        // Asia
+        if (offsetHours === 8) return 'CST'; // China
+        if (offsetHours === 9) return 'JST'; // Japan
+        if (offsetHours === 3) return 'MSK'; // Russia
+        
+        // Australia
+        if (offsetHours === 10) return 'AEST';
+        if (offsetHours === 11) return 'AEDT';
+        
+        // Brazil
+        if (offsetHours === -3) return 'BRT';
+        
+        // Fallback to GMT offset if no specific timezone found
+        const offsetHoursInt = Math.floor(Math.abs(offsetHours));
+        const offsetMinutes = Math.floor((Math.abs(offsetSeconds) % 3600) / 60);
+        const offsetSign = offsetHours >= 0 ? '+' : '-';
+        return `GMT${offsetSign}${offsetHoursInt.toString().padStart(2, '0')}:${offsetMinutes.toString().padStart(2, '0')}`;
+      };
+      
+      const timezoneAbbr = getTimezoneAbbreviation(weather.timezone, weather.name, weather.sys.country);
+      
+      // Format time with timezone abbreviation
+      const timeString = localTime.toLocaleString([], {
+        weekday: 'short',
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      }) + ` ${timezoneAbbr}`;
+      
+      setCurrentTime(timeString);
+    };
+
+    updateTime(); // Initial update
+    const interval = setInterval(updateTime, 1000); // Update every second for real-time
+
+    return () => clearInterval(interval);
+  }, [weather.timezone]);
   
   const metrics = [
     {
@@ -36,7 +126,7 @@ export const WeatherCard = ({ weather, preferences }: WeatherCardProps) => {
     {
       icon: Wind,
       label: 'Wind',
-      value: `${Math.round(weather.wind.speed)} m/s ${getWindDirection(weather.wind.deg)}`,
+      value: `${Math.round(weather.wind.speed * 10) / 10} m/s ${getWindDirection(weather.wind.deg)}`,
     },
     {
       icon: Gauge,
@@ -60,6 +150,9 @@ export const WeatherCard = ({ weather, preferences }: WeatherCardProps) => {
             <div>
               <h2 className="text-xl font-semibold">{weather.name}</h2>
               <p className="text-sm text-muted-foreground">{weather.sys.country}</p>
+              <p className="text-xs text-muted-foreground">
+                {currentTime}
+              </p>
             </div>
           </div>
           <Badge 

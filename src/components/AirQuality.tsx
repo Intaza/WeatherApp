@@ -1,5 +1,5 @@
 import { AirPollutionData } from '@/types/weather';
-import { getAQILevel } from '@/utils/weatherHelpers';
+import { computeCustomAQI, getAQILevel } from '@/utils/weatherHelpers';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Wind, AlertTriangle } from 'lucide-react';
@@ -39,7 +39,12 @@ export const AirQuality = ({ airQuality, loading = false }: AirQualityProps) => 
   }
 
   const currentAQI = airQuality.list[0];
-  const aqiInfo = getAQILevel(currentAQI.main.aqi);
+  // Use custom AQI derived from concentrations for finer city differences
+  const custom = computeCustomAQI({
+    pm2_5: currentAQI.components.pm2_5,
+    pm10: currentAQI.components.pm10,
+  });
+  const aqiInfo = getAQILevel(custom.categoryIndex);
   
   const pollutants = [
     { name: 'PM2.5', value: currentAQI.components.pm2_5.toFixed(1), unit: 'μg/m³' },
@@ -69,8 +74,9 @@ export const AirQuality = ({ airQuality, loading = false }: AirQualityProps) => 
       <CardContent className="space-y-4">
         {/* AQI Score */}
         <div className="text-center p-4 rounded-lg glass border border-white/10">
-          <div className="text-3xl font-bold mb-2">{currentAQI.main.aqi}/5</div>
+          <div className="text-3xl font-bold mb-2">{custom.categoryIndex}/5</div>
           <p className="text-sm text-muted-foreground">{aqiInfo.description}</p>
+          <div className="text-xs text-muted-foreground mt-1">US AQI: {custom.aqi} · Dominant: {custom.dominantPollutant.toUpperCase()}</div>
         </div>
 
         {/* Pollutant Breakdown */}
@@ -95,9 +101,9 @@ export const AirQuality = ({ airQuality, loading = false }: AirQualityProps) => 
             <span className="text-sm font-medium">Health Advice</span>
           </div>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            {currentAQI.main.aqi <= 2 
+            {custom.categoryIndex <= 2 
               ? "Good air quality. Perfect for outdoor activities."
-              : currentAQI.main.aqi === 3
+              : custom.categoryIndex === 3
               ? "Moderate air quality. Sensitive individuals should limit prolonged outdoor activities."
               : "Poor air quality. Consider staying indoors and avoiding strenuous outdoor activities."}
           </p>
